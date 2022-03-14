@@ -32,12 +32,10 @@ public class MainForm extends JFrame {
     private JSpinner spinner1;
     private JLabel stat;
 
-    private Timer timer = new Timer();
-    private TimerTask task;
-    private boolean isTimerRunning;
     int value[] = new int[100];
     float n = 0;
     Random random = new Random();
+    MyRandom myRandom = new MyRandom(Math.abs(new Long(System.currentTimeMillis()).intValue()));
 
     private void fillBox(JComboBox box){
         box.addItem("Встроенный Random");
@@ -46,57 +44,38 @@ public class MainForm extends JFrame {
 
     MainForm(){
         setContentPane(rootPanel);
-        setSize(800, 700);
+        setSize(1000, 900);
 
         fillBox(comboBox1);
 
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isTimerRunning)
-                    stopTimer();
-                else
-                    startTimer();
+                Arrays.fill(value, 0);
 
-
-            }
-        });
-    }
-
-    int plus = 0;
-
-    void startTimer(){
-        isTimerRunning = true;
-        task = new TimerTask() {
-            @Override
-            public void run() {
-                n++;
-                int rand;
-                switch (comboBox1.getSelectedIndex()) {
-                    case 1:
-                        rand = plus;
-                        plus++;
-                        if (plus>99)
-                            plus = 0;
-                        break;
-                    default:
-                        rand = random.nextInt(100);
-                        break;
-                }
-                value[rand] += 1;
+                int n = (int) spinner1.getValue();
 
                 DefaultCategoryDataset dataset = new DefaultCategoryDataset();
                 DefaultCategoryDataset secondDataset = new DefaultCategoryDataset();
 
-                double av= 0.01d;
-                double average = value[0];
+                double prev = 0;
+                double average = value[0]/n;
+                if (comboBox1.getSelectedIndex() == 0)
+                    for(int i = 1; i < n; i++)
+                        value[random.nextInt(100)] += 1;
+                else
+                    for(int i = 1; i < n; i++)
+                        value[myRandom.next()] += 1;
 
-                for(int i = 1; i< value.length; i++) {
+                for (int i = 0; i < value.length; i++) {
                     dataset.addValue(value[i], "", ""+i);
-                    average = (value[i] + average)/2;
-                    secondDataset.addValue(value[i] /n, "", ""+i);
+                    float a = value[i] / (float)n;
+                    average = (average + a)/2;
+                    prev = prev + a;
+                    secondDataset.addValue(prev, "", ""+i);
                 }
-                stat.setText(String.valueOf(average/n));
+
+                stat.setText(String.valueOf(average));
 
                 JFreeChart chart;
                 chart = createChart(dataset);
@@ -111,13 +90,7 @@ public class MainForm extends JFrame {
                 FPanel.add(chartPanel1);
                 FPanel.revalidate();
             }
-        };
-        timer.scheduleAtFixedRate(task, 0, 25);
-    }
-
-    void stopTimer(){
-        isTimerRunning = false;
-        task.cancel();
+        });
     }
 
     private JFreeChart createChart(CategoryDataset dataset)
@@ -146,8 +119,6 @@ public class MainForm extends JFrame {
             renderer.setBarPainter(new StandardBarPainter());
             renderer.setSeriesPaint(0, Color.black);
         }
-
-
 
         return chart;
     }
