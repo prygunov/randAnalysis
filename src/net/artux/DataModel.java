@@ -1,7 +1,5 @@
 package net.artux;
 
-import org.jfree.data.xy.XYDataItem;
-
 import java.util.Arrays;
 import java.util.Random;
 
@@ -29,8 +27,6 @@ public class DataModel {
         for (int i = 0; i < value.length; i++) {
             float p = value[i] / (float)n;
             average += i * p; //мат ожидание
-
-
         }
 
         for (int i = 0; i < value.length; i++) {
@@ -42,6 +38,10 @@ public class DataModel {
         lastDispersion = d;
 
         return value;
+    }
+
+    public double getNextDouble(){
+        return myRandom.nextDouble();
     }
 
     public double getLastAverage() {

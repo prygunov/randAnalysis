@@ -26,8 +26,10 @@ public class PiForm extends JFrame {
     private JPanel circlePanel;
     private JPanel rootPanel;
     private JFreeChart circleChart;
-    MyRandom random = new MyRandom(System.currentTimeMillis());
+
+    private DataModel dataModel = App.getDataModel();
     private XYSeriesCollection circleSeriesCollection = new XYSeriesCollection();
+
     PiForm() {
         setContentPane(rootPanel);
 
@@ -37,37 +39,35 @@ public class PiForm extends JFrame {
         model.setMaximum(1000000);
         nCircleSpinner.setModel(model);
 
-        setMinimumSize(new Dimension(500, 500) {
-        });
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int n = (int) nCircleSpinner.getValue();
+        setMinimumSize(new Dimension(500, 500) {});
+        startButton.addActionListener(e -> {
+            int n = (int) nCircleSpinner.getValue();
 
-                circleSeriesCollection.removeAllSeries();
-                int s = 0;
-                XYSeries circle = new XYSeries("");
-                double xStep = 0.01d;
-                for (int i = 0; i < 101; i++) {
-                    double x = xStep*i;
-                    double y = Math.sqrt(1 - Math.pow(x,2));
-                    circle.add(new XYDataItem(x, y));
-                }
-                XYSeries points = new XYSeries("");
-                for (int i = 0; i < n; i++) {
-                    double x = random.nextDouble();
-                    double y = random.nextDouble();
-                    points.add(new XYDataItem(x, y));
-
-                    if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) <= 1)
-                        s++;
-                }
-                double pi = (double) (4 * s) / (double)n;
-                piLabel.setText(String.valueOf(pi));
-                circleSeriesCollection.addSeries(circle);
-                circleSeriesCollection.addSeries(points);
-                updateCharts();
+            circleSeriesCollection.removeAllSeries();
+            int s = 0;
+            XYSeries circle = new XYSeries("");
+            double xStep = 0.01d;
+            for (int i = 0; i < 101; i++) {
+                double x = xStep*i;
+                double y = Math.sqrt(1 - Math.pow(x,2));
+                circle.add(new XYDataItem(x, y));
             }
+            XYSeries points = new XYSeries("");
+            for (int i = 0; i < n; i++) {
+                double x = dataModel.getNextDouble();
+                double y = dataModel.getNextDouble();
+                points.add(new XYDataItem(x, y));
+
+                if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) <= 1)
+                    s++;
+            }
+
+            double pi = (double) (4 * s) / (double)n; // значение пи
+
+            piLabel.setText(String.valueOf(pi));
+            circleSeriesCollection.addSeries(circle);
+            circleSeriesCollection.addSeries(points);
+            updateCharts();
         });
 
 
@@ -95,7 +95,6 @@ public class PiForm extends JFrame {
         XYPlot plot = chart.getXYPlot();
 
         var renderer = new XYLineAndShapeRenderer();
-
 
         plot.setRenderer(renderer);
         plot.setBackgroundPaint(Color.white);

@@ -34,7 +34,7 @@ public class MainForm extends JFrame {
     private JButton piFormButton;
 
     private PiForm piForm;
-    private DataModel dataModel;
+    private DataModel dataModel = App.getDataModel();
 
     private JFreeChart fChart;
     private JFreeChart FChart;
@@ -43,6 +43,7 @@ public class MainForm extends JFrame {
     private final XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
 
     int iteration;
+
     private void fillBox(JComboBox<String> box){
         box.addItem("Встроенный");
         box.addItem("Собственный");
@@ -51,7 +52,6 @@ public class MainForm extends JFrame {
     MainForm(){
         piForm = new PiForm();
         piForm.setVisible(false);
-        dataModel = new DataModel();
 
         setContentPane(rootPanel);
         setExtendedState(MAXIMIZED_BOTH);
@@ -74,7 +74,7 @@ public class MainForm extends JFrame {
             double prev = 0;
 
             for (int i = 0; i < value.length; i++) {
-                float p = value[i] / (float)n;
+                float p = value[i] / (float) n;
 
                 fCategoryDataset.addValue(p, iteration +" "+ title, ""+i);
                 prev = prev + p;

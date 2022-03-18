@@ -12,7 +12,7 @@ public class MyRandom {
     }
 
     public double nextDouble(){
-        seed = (a * seed + b) % c;
+        seed = (a * seed + b) % c; // РЗ 16 бит
         return seed / (double) c;
         //[0, 1)
     }
