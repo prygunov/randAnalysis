@@ -17,9 +17,9 @@ public class MyRandom {
         //[0, 1)
     }
 
-    public int getRand(int n) {
+    public int nextInt(int bound) {
         //[0,n-1]
         double next = nextDouble();
-        return (int) (next * n);
+        return (int) (next * bound);
     }
 }

@@ -30,6 +30,13 @@ public class PiForm extends JFrame {
     private XYSeriesCollection circleSeriesCollection = new XYSeriesCollection();
     PiForm() {
         setContentPane(rootPanel);
+
+        var model = new SpinnerNumberModel();
+        model.setMinimum(100);
+        model.setValue(100);
+        model.setMaximum(1000000);
+        nCircleSpinner.setModel(model);
+
         setMinimumSize(new Dimension(500, 500) {
         });
         startButton.addActionListener(new ActionListener() {
@@ -103,6 +110,5 @@ public class PiForm extends JFrame {
         ((XYLineAndShapeRenderer)((XYPlot) circleChart.getPlot()).getRenderer()).setSeriesLinesVisible(0, true);
         ((XYLineAndShapeRenderer)((XYPlot) circleChart.getPlot()).getRenderer()).setSeriesShapesVisible(0, false);
         ((XYLineAndShapeRenderer)((XYPlot) circleChart.getPlot()).getRenderer()).setSeriesLinesVisible(1, false);
-
     }
 }

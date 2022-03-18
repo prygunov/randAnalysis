@@ -17,10 +17,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.Random;
 
 public class MainForm extends JFrame {
 
@@ -28,7 +24,7 @@ public class MainForm extends JFrame {
     private JPanel fPanel;
     private JPanel FPanel;
     private JPanel contentPanel;
-    private JComboBox comboBox1;
+    private JComboBox<String> comboBox1;
     private JButton button1;
     private JSpinner spinner1;
     private JLabel waiterLabel;
@@ -37,21 +33,17 @@ public class MainForm extends JFrame {
     private JLabel squareAverageLabel;
     private JButton piFormButton;
 
-    PiForm piForm;
-
-    int value[] = new int[100];
-    float n = 0;
-    Random random = new Random();
-    MyRandom myRandom = new MyRandom(System.currentTimeMillis());
+    private PiForm piForm;
+    private DataModel dataModel;
 
     private JFreeChart fChart;
     private JFreeChart FChart;
 
-    private DefaultCategoryDataset fCategoryDataset = new DefaultCategoryDataset();
-    private XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+    private final DefaultCategoryDataset fCategoryDataset = new DefaultCategoryDataset();
+    private final XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
 
     int iteration;
-    private void fillBox(JComboBox box){
+    private void fillBox(JComboBox<String> box){
         box.addItem("Встроенный");
         box.addItem("Собственный");
     }
@@ -59,6 +51,7 @@ public class MainForm extends JFrame {
     MainForm(){
         piForm = new PiForm();
         piForm.setVisible(false);
+        dataModel = new DataModel();
 
         setContentPane(rootPanel);
         setExtendedState(MAXIMIZED_BOTH);
@@ -72,65 +65,39 @@ public class MainForm extends JFrame {
         model.setMaximum(1000000);
         spinner1.setModel(model);
 
-        button1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Arrays.fill(value, 0);
+        button1.addActionListener(e -> {
+            int n = (int) spinner1.getValue();
+            int[] value = dataModel.getValues(comboBox1.getSelectedIndex() == 0, n);
 
-                int n = (int) spinner1.getValue();
+            String title = comboBox1.getSelectedItem() + " ("+n+")";
+            XYSeries series = new XYSeries(title);
+            double prev = 0;
 
-                if (comboBox1.getSelectedIndex() == 0)
-                    for(int i = 1; i < n; i++)
-                        value[random.nextInt(100)] += 1;
-                else
-                    for(int i = 1; i < n; i++)
-                        value[myRandom.getRand(100)] += 1;
+            for (int i = 0; i < value.length; i++) {
+                float p = value[i] / (float)n;
 
-                String title = comboBox1.getSelectedItem() + " ("+n+")";
-                XYSeries series = new XYSeries(title);
-                double prev = 0;
-                double average = 0d;
-
-                for (int i = 0; i < value.length; i++) {
-                    float p = value[i] / (float)n;
-                    average += i * p;
-
-                    fCategoryDataset.addValue(p, iteration +" "+ title, ""+i);
-                    prev = prev + p;
-                    series.add(new XYDataItem(i, prev));
-                    series.add(new XYDataItem(i+1, prev));
-                }
-
-                double d = 0d;
-                for (int i = 0; i < value.length; i++) {
-                    float p = value[i] / (float)n;
-                    d+=Math.pow(i - average, 2) * p;
-                }
-                xySeriesCollection.addSeries(series);
-                iteration++;
-
-                waiterLabel.setText("Мат. ожидание: " + average);
-                dispersionLabel.setText("Дисперсия:" + d);
-                squareAverageLabel.setText("Среднее квадратичное отклонение:" + Math.sqrt(d));
-
-                updateCharts();
+                fCategoryDataset.addValue(p, iteration +" "+ title, ""+i);
+                prev = prev + p;
+                series.add(new XYDataItem(i, prev));
+                series.add(new XYDataItem(i+1, prev));
             }
+
+            xySeriesCollection.addSeries(series);
+            iteration++;
+
+            waiterLabel.setText("Мат. ожидание: " + dataModel.getLastAverage());
+            dispersionLabel.setText("Дисперсия:" + dataModel.getLastDispersion());
+            squareAverageLabel.setText("Среднее квадратичное отклонение:" + dataModel.getLastDeviation());
+
+            updateCharts();
         });
-        clearButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fCategoryDataset.clear();
-                xySeriesCollection.removeAllSeries();
-                updateCharts();
-                iteration = 0;
-            }
+        clearButton.addActionListener(e -> {
+            fCategoryDataset.clear();
+            xySeriesCollection.removeAllSeries();
+            updateCharts();
+            iteration = 0;
         });
-        piFormButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                piForm.setVisible(true);
-            }
-        });
+        piFormButton.addActionListener(e -> piForm.setVisible(true));
         initCharts();
     }
 
@@ -144,15 +111,14 @@ public class MainForm extends JFrame {
         for (int i = 0; i < xySeriesCollection.getSeriesCount(); i++) {
             ((XYLineAndShapeRenderer) xyPlot.getRenderer()).setSeriesShapesVisible(i, false);
         }
-
     }
 
     void initCharts(){
         int w = 900;
         int h = 800;
 
-        fChart = createChart("f", fCategoryDataset);
-        FChart = createChart( "F", xySeriesCollection);
+        fChart = createChart(fCategoryDataset);
+        FChart = createChart(xySeriesCollection);
 
         ChartPanel chartPanel = new ChartPanel(fChart) { // this is the trick to manage setting the size of a chart into a panel!
             public Dimension getPreferredSize() {
@@ -173,9 +139,9 @@ public class MainForm extends JFrame {
         FPanel.revalidate();
     }
 
-    private JFreeChart createChart(String title, final CategoryDataset dataset) {
+    private JFreeChart createChart(final CategoryDataset dataset) {
         final JFreeChart chart = ChartFactory.createBarChart(
-                title,  // chart title
+                "f",  // chart title
                 null,                  // domain axis label
                 null,                     // range axis label
                 dataset,                     // data
@@ -191,8 +157,7 @@ public class MainForm extends JFrame {
         plot.getDomainAxis().setLowerMargin(0);
         plot.getDomainAxis().setTickLabelsVisible(false);
 
-        if (plot.getRenderer() instanceof BarRenderer) {
-            BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        if (plot.getRenderer() instanceof BarRenderer renderer) {
             renderer.setDrawBarOutline(false);
             renderer.setItemMargin(0);
             renderer.setShadowVisible(false);
@@ -203,10 +168,10 @@ public class MainForm extends JFrame {
         return chart;
     }
 
-    private JFreeChart createChart(String title, XYSeriesCollection dataset)
+    private JFreeChart createChart(XYSeriesCollection dataset)
     {
         JFreeChart chart = ChartFactory.createXYLineChart(
-                title,
+                "F",
                 "",             // x-axis label
                 "",                // y-axis label
                 dataset, PlotOrientation.VERTICAL,true, false, false);
