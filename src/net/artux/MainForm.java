@@ -184,7 +184,6 @@ public class MainForm extends JFrame {
         plot.setRangeGridlinesVisible(false);
         plot.setDomainGridlinesVisible(false);
         plot.getDomainAxis().setTickLabelsVisible(false);
-        plot.getDomainAxis().setTickMarksVisible(false);
 
         if (dataset!=null)
             for (int i = 0; i < dataset.getSeriesCount(); i++) {
