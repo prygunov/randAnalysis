@@ -52,7 +52,7 @@ public class MainForm extends JFrame {
 
     int iteration;
     private void fillBox(JComboBox box){
-        box.addItem("Встроенный Random");
+        box.addItem("Встроенный");
         box.addItem("Собственный");
     }
 
@@ -62,6 +62,7 @@ public class MainForm extends JFrame {
 
         setContentPane(rootPanel);
         setExtendedState(MAXIMIZED_BOTH);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1900, 1060){});
 
         fillBox(comboBox1);
