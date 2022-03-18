@@ -42,7 +42,7 @@ public class MainForm extends JFrame {
     int value[] = new int[100];
     float n = 0;
     Random random = new Random();
-    MyRandom myRandom = new MyRandom(Math.abs(new Long(System.currentTimeMillis()).intValue()));
+    MyRandom myRandom = new MyRandom(System.currentTimeMillis());
 
     private JFreeChart fChart;
     private JFreeChart FChart;
@@ -83,7 +83,7 @@ public class MainForm extends JFrame {
                         value[random.nextInt(100)] += 1;
                 else
                     for(int i = 1; i < n; i++)
-                        value[myRandom.next()] += 1;
+                        value[myRandom.getRand(100)] += 1;
 
                 String title = comboBox1.getSelectedItem() + " ("+n+")";
                 XYSeries series = new XYSeries(title);

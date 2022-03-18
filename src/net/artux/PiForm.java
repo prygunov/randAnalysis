@@ -26,7 +26,7 @@ public class PiForm extends JFrame {
     private JPanel circlePanel;
     private JPanel rootPanel;
     private JFreeChart circleChart;
-    Random random = new Random();
+    MyRandom random = new MyRandom(System.currentTimeMillis());
     private XYSeriesCollection circleSeriesCollection = new XYSeriesCollection();
     PiForm() {
         setContentPane(rootPanel);
@@ -48,14 +48,15 @@ public class PiForm extends JFrame {
                 }
                 XYSeries points = new XYSeries("");
                 for (int i = 0; i < n; i++) {
-                    float x = random.nextFloat();
-                    float y = random.nextFloat();
+                    double x = random.nextDouble();
+                    double y = random.nextDouble();
                     points.add(new XYDataItem(x, y));
 
                     if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) <= 1)
                         s++;
                 }
-                piLabel.setText(String.valueOf((s/(float)n)* 4));
+                double pi = (double) (4 * s) / (double)n;
+                piLabel.setText(String.valueOf(pi));
                 circleSeriesCollection.addSeries(circle);
                 circleSeriesCollection.addSeries(points);
                 updateCharts();
@@ -93,19 +94,14 @@ public class PiForm extends JFrame {
         plot.setBackgroundPaint(Color.white);
         plot.setRangeGridlinesVisible(false);
         plot.setDomainGridlinesVisible(false);
-        plot.getDomainAxis().setTickLabelsVisible(false);
-        plot.getDomainAxis().setTickMarksVisible(false);
 
-        if (dataset!=null)
-            for (int i = 0; i < dataset.getSeriesCount(); i++) {
-                renderer.setSeriesShapesVisible(i, false);
-            }
         return chart;
     }
     void updateCharts(){
         XYPlot xyPlot = (XYPlot) circleChart.getPlot();
         xyPlot.setDataset(circleSeriesCollection);
         ((XYLineAndShapeRenderer)((XYPlot) circleChart.getPlot()).getRenderer()).setSeriesLinesVisible(0, true);
+        ((XYLineAndShapeRenderer)((XYPlot) circleChart.getPlot()).getRenderer()).setSeriesShapesVisible(0, false);
         ((XYLineAndShapeRenderer)((XYPlot) circleChart.getPlot()).getRenderer()).setSeriesLinesVisible(1, false);
 
     }

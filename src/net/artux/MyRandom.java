@@ -2,24 +2,24 @@ package net.artux;
 
 public class MyRandom {
 
-    private int a = 16807;
-    private int m = 2147483647;
-    private int q = 127773;
-    private int r = 2836;
-    private int seed;
+    public int a = 25173;
+    public int c = 65536;
+    public int b = 13849;
+    public long seed;
 
-    public MyRandom(int seed) {
-        if (seed <= 0 || seed == Integer.MAX_VALUE)
-            throw new RuntimeException("Bad seed");
+    public MyRandom(long seed) {
         this.seed = seed;
     }
 
-    public int next() {
-        int hi = seed / q;
-        int lo = seed % q;
-        seed = (a * lo) - (r * hi);
-        if (seed <= 0)
-            seed = seed + m;
-        return (int) (((seed * 1.0) / m)* 100);
+    public double nextDouble(){
+        seed = (a * seed + b) % c;
+        return seed / (double) c;
+        //[0, 1)
+    }
+
+    public int getRand(int n) {
+        //[0,n-1]
+        double next = nextDouble();
+        return (int) (next * n);
     }
 }
