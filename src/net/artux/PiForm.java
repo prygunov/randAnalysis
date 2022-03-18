@@ -3,6 +3,7 @@ package net.artux;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
@@ -39,7 +40,7 @@ public class PiForm extends JFrame {
                 circleSeriesCollection.removeAllSeries();
                 int s = 0;
                 XYSeries circle = new XYSeries("");
-                double xStep = 0.1d;
+                double xStep = 0.01d;
                 for (int i = 0; i < 101; i++) {
                     double x = xStep*i;
                     double y = Math.sqrt(1 - Math.pow(x,2));
@@ -60,7 +61,11 @@ public class PiForm extends JFrame {
                 updateCharts();
             }
         });
+
+
         circleChart = createCircleChart("Pi", circleSeriesCollection);
+        NumberAxis rangeAxis = (NumberAxis)circleChart.getXYPlot().getDomainAxis();
+        rangeAxis.setRange(0,1);
 
         ChartPanel chartPanel = new ChartPanel(circleChart) { // this is the trick to manage setting the size of a chart into a panel!
             public Dimension getPreferredSize() {
