@@ -22,4 +22,16 @@ public class MyRandom {
         double next = nextDouble();
         return (int) (next * bound);
     }
+
+    public double nextNormal(int n){
+        double sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += nextDouble();
+        }
+        return (sum - n/2);
+    }
+
+    public int nextNormal(int n, int m, int sigma){
+        return (int) (m + sigma * nextNormal(n));
+    }
 }

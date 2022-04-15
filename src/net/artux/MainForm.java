@@ -17,6 +17,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainForm extends JFrame {
 
@@ -32,6 +34,12 @@ public class MainForm extends JFrame {
     private JLabel dispersionLabel;
     private JLabel squareAverageLabel;
     private JButton piFormButton;
+    private JSpinner mSpinner;
+    private JSpinner sigmaSpinner;
+    private JButton applyButton;
+    private JLabel n;
+    private JSpinner nSpinner;
+    private JLabel interavalLabel;
 
     private PiForm piForm;
     private DataModel dataModel = App.getDataModel();
@@ -85,10 +93,7 @@ public class MainForm extends JFrame {
             xySeriesCollection.addSeries(series);
             iteration++;
 
-            waiterLabel.setText("Мат. ожидание: " + dataModel.getLastAverage());
-            dispersionLabel.setText("Дисперсия:" + dataModel.getLastDispersion());
-            squareAverageLabel.setText("Среднее квадратичное отклонение:" + dataModel.getLastDeviation());
-
+            updateLabels();
             updateCharts();
         });
         clearButton.addActionListener(e -> {
@@ -97,8 +102,46 @@ public class MainForm extends JFrame {
             updateCharts();
             iteration = 0;
         });
+        applyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int n = (int) spinner1.getValue();
+
+                int m = (int)mSpinner.getValue();
+                int sigma = (int)sigmaSpinner.getValue();
+                int rn = (int)nSpinner.getValue();
+
+                int[] value = dataModel.getNormalValues(n, rn, m, sigma);
+
+                String title = comboBox1.getSelectedItem() + " ("+n+") " + "m = " + m + ", sigma = " + sigma;
+                XYSeries series = new XYSeries(title);
+                double prev = 0;
+
+                for (int i = 0; i < value.length; i++) {
+                    float p = value[i] / (float) n;
+
+                    fCategoryDataset.addValue(p, iteration +" "+ title, ""+i);
+                    prev = prev + p;
+                    series.add(new XYDataItem(i, prev));
+                    series.add(new XYDataItem(i+1, prev));
+                }
+
+                xySeriesCollection.addSeries(series);
+                iteration++;
+
+                updateLabels();
+                updateCharts();
+            }
+        });
         piFormButton.addActionListener(e -> piForm.setVisible(true));
         initCharts();
+    }
+
+    void updateLabels(){
+        waiterLabel.setText("Мат. ожидание: " + dataModel.getLastAverage());
+        dispersionLabel.setText("Дисперсия:" + dataModel.getLastDispersion());
+        squareAverageLabel.setText("Среднее квадратичное отклонение:" + dataModel.getLastDeviation());
+        interavalLabel.setText("Интервал: " + dataModel.getInterval());
     }
 
     void updateCharts(){
