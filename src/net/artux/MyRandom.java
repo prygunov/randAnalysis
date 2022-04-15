@@ -28,7 +28,7 @@ public class MyRandom {
         for (int i = 0; i < n; i++) {
             sum += nextDouble();
         }
-        return (sum - n/2);
+        return (sum - 0.5 * n);
     }
 
     public int nextNormal(int n, int m, int sigma){
