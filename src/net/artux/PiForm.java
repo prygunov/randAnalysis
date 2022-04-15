@@ -34,9 +34,9 @@ public class PiForm extends JFrame {
         setContentPane(rootPanel);
 
         var model = new SpinnerNumberModel();
-        model.setMinimum(100);
-        model.setValue(100);
-        model.setMaximum(1000000);
+        model.setMinimum(10000);
+        model.setValue(10000);
+        model.setMaximum(100000000);
         nCircleSpinner.setModel(model);
 
         setMinimumSize(new Dimension(500, 500) {});
@@ -58,7 +58,7 @@ public class PiForm extends JFrame {
                 double y = dataModel.getNextDouble();
                 points.add(new XYDataItem(x, y));
 
-                if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) <= 1)
+                if (x*x + y*y <= 1)
                     s++;
             }
 
@@ -100,6 +100,8 @@ public class PiForm extends JFrame {
         plot.setBackgroundPaint(Color.white);
         plot.setRangeGridlinesVisible(false);
         plot.setDomainGridlinesVisible(false);
+        Rectangle rect = new Rectangle(1, 1);
+        renderer.setSeriesShape(1, rect);
 
         return chart;
     }
