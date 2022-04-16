@@ -71,7 +71,7 @@ public class MainForm extends JFrame {
         fillBox(comboBox1);
         var model = new SpinnerNumberModel();
         model.setMinimum(100);
-        model.setValue(100);
+        model.setValue(100000);
         model.setMaximum(1000000);
         spinner1.setModel(model);
 
