@@ -40,7 +40,7 @@ public class DataModel {
                 if (values.containsKey(v))
                     values.put(v, values.get(v) + 1);
                 else
-                    values.put(v, 0);
+                    values.put(v, 1);
             }
         }
         updateValues(n);

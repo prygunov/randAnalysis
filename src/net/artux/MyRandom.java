@@ -32,6 +32,6 @@ public class MyRandom {
     }
 
     public int nextNormal(int n, int m, int sigma){
-        return (int) (m + sigma * nextNormal(n));
+        return (int)Math.floor(m + sigma * nextNormal(n));
     }
 }
