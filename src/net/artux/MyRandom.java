@@ -20,7 +20,7 @@ public class MyRandom {
     public int nextInt(int bound) {
         //[0,n-1]
         double next = nextDouble();
-        return (int) (next * bound);
+        return (int)(next * bound);
     }
 
     public double nextNormal(int n){

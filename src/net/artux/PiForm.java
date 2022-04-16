@@ -4,7 +4,6 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -14,9 +13,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Random;
 
 public class PiForm extends JFrame {
 
@@ -25,6 +21,7 @@ public class PiForm extends JFrame {
     private JLabel piLabel;
     private JPanel circlePanel;
     private JPanel rootPanel;
+    private JCheckBox visualisationCheck;
     private JFreeChart circleChart;
 
     private DataModel dataModel = App.getDataModel();
@@ -39,7 +36,7 @@ public class PiForm extends JFrame {
         model.setMaximum(100000000);
         nCircleSpinner.setModel(model);
 
-        setMinimumSize(new Dimension(500, 500) {});
+        setMinimumSize(new Dimension(800, 800) {});
         startButton.addActionListener(e -> {
             int n = (int) nCircleSpinner.getValue();
 
@@ -49,18 +46,27 @@ public class PiForm extends JFrame {
             double xStep = 0.01d;
             for (int i = 0; i < 101; i++) {
                 double x = xStep*i;
-                double y = Math.sqrt(1 - Math.pow(x,2));
+                double y = Math.sqrt(1 - x*x);
                 circle.add(new XYDataItem(x, y));
             }
-            XYSeries points = new XYSeries("");
-            for (int i = 0; i < n; i++) {
-                double x = dataModel.getNextDouble();
-                double y = dataModel.getNextDouble();
-                points.add(new XYDataItem(x, y));
 
-                if (x*x + y*y <= 1)
-                    s++;
-            }
+            XYSeries points = new XYSeries("");
+            if (visualisationCheck.isSelected())
+                for (int i = 0; i < n; i++) {
+                    double x = dataModel.getNextDouble();
+                    double y = dataModel.getNextDouble();
+
+                    points.add(new XYDataItem(x, y));
+                    if (x*x + y*y <= 1)
+                        s++;
+                }
+            else
+                for (int i = 0; i < n; i++) {
+                    double x = dataModel.getNextDouble();
+                    double y = dataModel.getNextDouble();
+                    if (x*x + y*y <= 1)
+                        s++;
+                }
 
             double pi = (double) (4 * s) / (double)n; // значение пи
 
@@ -71,13 +77,13 @@ public class PiForm extends JFrame {
         });
 
 
-        circleChart = createCircleChart("Pi", circleSeriesCollection);
+        circleChart = createCircleChart(circleSeriesCollection);
         NumberAxis rangeAxis = (NumberAxis)circleChart.getXYPlot().getDomainAxis();
         rangeAxis.setRange(0,1);
 
         ChartPanel chartPanel = new ChartPanel(circleChart) { // this is the trick to manage setting the size of a chart into a panel!
             public Dimension getPreferredSize() {
-                return new Dimension(400, 400);
+                return new Dimension(750, 750);
             }
         };
 
@@ -85,13 +91,13 @@ public class PiForm extends JFrame {
         circlePanel.add(chartPanel);
         circlePanel.revalidate();
     }
-    private JFreeChart createCircleChart(String title, XYSeriesCollection dataset)
+    private JFreeChart createCircleChart(XYSeriesCollection dataset)
     {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 null,
                 "",             // x-axis label
                 "",                // y-axis label
-                dataset, PlotOrientation.VERTICAL,true, false, false);
+                dataset, PlotOrientation.VERTICAL,false, false, false);
         XYPlot plot = chart.getXYPlot();
 
         var renderer = new XYLineAndShapeRenderer();

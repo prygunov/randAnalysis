@@ -19,6 +19,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainForm extends JFrame {
 
@@ -39,7 +41,6 @@ public class MainForm extends JFrame {
     private JButton applyButton;
     private JLabel n;
     private JSpinner nSpinner;
-    private JLabel interavalLabel;
 
     private PiForm piForm;
     private DataModel dataModel = App.getDataModel();
@@ -53,8 +54,9 @@ public class MainForm extends JFrame {
     int iteration;
 
     private void fillBox(JComboBox<String> box){
-        box.addItem("Встроенный");
-        box.addItem("Собственный");
+        box.addItem("Встроенный - равномерное");
+        box.addItem("Собственный - равномерное");
+        box.addItem("Собственный - нормальное");
     }
 
     MainForm(){
@@ -73,16 +75,28 @@ public class MainForm extends JFrame {
         model.setMaximum(1000000);
         spinner1.setModel(model);
 
+        mSpinner.setValue(50);
+        sigmaSpinner.setValue(16);
+        nSpinner.setValue(12);
+
         button1.addActionListener(e -> {
             int n = (int) spinner1.getValue();
-            int[] value = dataModel.getValues(comboBox1.getSelectedIndex() == 0, n);
+            int m = (int)mSpinner.getValue();
+            int sigma = (int)sigmaSpinner.getValue();
+            int rn = (int)nSpinner.getValue();
+
+            HashMap<Integer, Integer>  value = dataModel.getValues(comboBox1.getSelectedIndex(), n, rn, m, sigma);
 
             String title = comboBox1.getSelectedItem() + " ("+n+")";
             XYSeries series = new XYSeries(title);
             double prev = 0;
 
-            for (int i = 0; i < value.length; i++) {
-                float p = value[i] / (float) n;
+            for (int i = 0; i < 100; i++) {
+                Integer count = value.get(i);
+
+                float p = 0;
+                if (count!=null)
+                    p = count.intValue() / (float) n;
 
                 fCategoryDataset.addValue(p, iteration +" "+ title, ""+i);
                 prev = prev + p;
@@ -102,37 +116,7 @@ public class MainForm extends JFrame {
             updateCharts();
             iteration = 0;
         });
-        applyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int n = (int) spinner1.getValue();
 
-                int m = (int)mSpinner.getValue();
-                int sigma = (int)sigmaSpinner.getValue();
-                int rn = (int)nSpinner.getValue();
-
-                int[] value = dataModel.getNormalValues(n, rn, m, sigma);
-
-                String title = comboBox1.getSelectedItem() + " ("+n+") " + "m = " + m + ", sigma = " + sigma;
-                XYSeries series = new XYSeries(title);
-                double prev = 0;
-
-                for (int i = 0; i < value.length; i++) {
-                    float p = value[i] / (float) n;
-
-                    fCategoryDataset.addValue(p, iteration +" "+ title, ""+i);
-                    prev = prev + p;
-                    series.add(new XYDataItem(i, prev));
-                    series.add(new XYDataItem(i+1, prev));
-                }
-
-                xySeriesCollection.addSeries(series);
-                iteration++;
-
-                updateLabels();
-                updateCharts();
-            }
-        });
         piFormButton.addActionListener(e -> piForm.setVisible(true));
         initCharts();
     }
@@ -141,7 +125,6 @@ public class MainForm extends JFrame {
         waiterLabel.setText("Мат. ожидание: " + dataModel.getLastAverage());
         dispersionLabel.setText("Дисперсия:" + dataModel.getLastDispersion());
         squareAverageLabel.setText("Среднее квадратичное отклонение:" + dataModel.getLastDeviation());
-        interavalLabel.setText("Интервал: " + dataModel.getInterval());
     }
 
     void updateCharts(){
@@ -157,8 +140,8 @@ public class MainForm extends JFrame {
     }
 
     void initCharts(){
-        int w = 900;
-        int h = 800;
+        int w = 750;
+        int h = 650;
 
         fChart = createChart(fCategoryDataset);
         FChart = createChart(xySeriesCollection);
